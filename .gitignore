@@ -1,0 +1,9 @@
+.vscode/
+.tscache/
+node_modules/
+*.js
+*.js.map
+*.d.ts
+
+!Gruntfile.js
+npm-debug.log

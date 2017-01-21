@@ -1,0 +1,5 @@
+/*
+ * partygame.show @VERSION (https://github.com/molisani/partygame.show-protocol) 
+ * Copyright 2017 Michael Molisani
+ * Licensed under LGPL-3.0 (https://github.com/molisani/partygame.show-protocol/blob/master/LICENSE)
+ */
