@@ -84,6 +84,10 @@ declare namespace PartyGameShow {
         interface Host extends Events.FromHost, Listener<Events.ToHost> {}
         interface Client extends Events.FromClient, Listener<Events.ToClient> {}
     }
+    namespace Managers {
+        interface Host extends Events.ToHost, Listener<Events.FromHost> {}
+        interface Client extends Events.ToClient, Listener<Events.FromClient> {}
+    }
     namespace View {
         interface Host {
             start_game(host: Services.Host, players: Player[]): Promise<PlayerMap<PlayerScoreEntry>>;

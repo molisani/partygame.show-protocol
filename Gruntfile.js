@@ -36,6 +36,6 @@ module.exports = function(grunt) {
 
   require("load-grunt-tasks")(grunt);
 
-  grunt.registerTask("compile", ["ts:all", "concat:all", "sed:all", "clean:tscommand"]);
+  grunt.registerTask("compile", ["tslint:all", "ts:all", "concat:all", "sed:all", "clean:tscommand"]);
   
 }

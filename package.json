@@ -1,8 +1,11 @@
 {
   "name": "partygame.show",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "description": "Protocol for developing games for the PartyGame.Show framework",
   "types": "index.d.ts",
+  "scripts": {
+    "prepublish": "grunt compile"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/molisani/partygame.show-protocol.git"
