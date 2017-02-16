@@ -1,5 +1,5 @@
 /*
- * partygame.show 1.0.0-alpha.2 (https://github.com/molisani/partygame.show-protocol) 
+ * partygame.show 1.0.0-alpha.3 (https://github.com/molisani/partygame.show-protocol) 
  * Copyright 2017 Michael Molisani
  * Licensed under LGPL-3.0 (https://github.com/molisani/partygame.show-protocol/blob/master/LICENSE)
  */
@@ -10,8 +10,8 @@ declare namespace PartyGameShow {
             title: string;
             subtitle: string;
             version: string;
-            players_min: number;
-            players_max?: number;
+            minPlayers: number;
+            maxPlayers?: number;
         }
         interface Loader {
             gametype: string;
@@ -43,47 +43,47 @@ declare namespace PartyGameShow {
             type: string;
         }
         interface Packet {
-            msg_id: string;
-            recipient_uids: string[];
+            msgId: string;
+            recipients: string[];
             payload: Payload;
-            expires_after: number;
+            expiresAfter: number;
             notify: boolean;
         }
         interface ResponsePayload extends Payload {
-            author_uid: string;
+            author: string;
         }
         interface ResponsePacket {
-            msg_id: string;
+            msgId: string;
             player: Player;
             response: ResponsePayload;
         }
     }
     namespace Events {
         interface ToHost {
-            player_joined(player: Player): void;
-            player_returned(packet: Messages.ResponsePacket): void;
+            playerJoined(player: Player): void;
+            playerReturned(packet: Messages.ResponsePacket): void;
         }
         interface FromHost {
-            start_game(room: Room): void;
-            end_game(): void;
-            send_packet(packet: Messages.Packet): void;
-            force_clear(): void;
+            startGame(room: Room): void;
+            endGame(): void;
+            sendPacket(packet: Messages.Packet): void;
+            forceClear(): void;
         }
         interface ToClient {
-            player_info(player: Player): void;
-            load_game(gametype: string): void;
-            unload_game(): void;
-            on_packet(packet: Messages.Packet): void;
-            on_clear(): void;
+            playerInfo(player: Player): void;
+            loadGame(gametype: string): void;
+            unloadGame(): void;
+            onPacket(packet: Messages.Packet): void;
+            onClear(): void;
         }
         interface FromClient {
-            join_room(request: JoinRequest): void;
-            return_response(packet: Messages.ResponsePacket): void;
+            joinRoom(request: JoinRequest): void;
+            returnResponse(packet: Messages.ResponsePacket): void;
         }
     }
     interface Listener<Events> {
-        add_listeners(listeners: Partial<Events>): void;
-        remove_listeners(listeners: Partial<Events>): void;
+        addListeners(listeners: Partial<Events>): void;
+        removeListeners(listeners: Partial<Events>): void;
     }
     namespace Services {
         interface Host extends Events.FromHost, Listener<Events.ToHost> {}
@@ -95,13 +95,13 @@ declare namespace PartyGameShow {
     }
     namespace View {
         interface Host {
-            start_game(host: Services.Host, players: Player[]): Promise<PlayerMap<PlayerScoreEntry>>;
+            startGame(host: Services.Host, players: Player[]): Promise<PlayerMap<PlayerScoreEntry>>;
         }
         interface ClientRequestHandler<P extends Messages.Payload> {
             handle(self: Player, payload: P): Promise<Messages.ResponsePayload>;
         }
         interface Client {
-            get_handler(msgType: string): ClientRequestHandler<Messages.Payload>;
+            getHandler(msgType: string): ClientRequestHandler<Messages.Payload>;
         }
     }
 }
