@@ -55,6 +55,29 @@ declare namespace PartyGameShow {
     }
     namespace Events {
         interface ToHost {
+            playerJoined: Player;
+            playerReturned: Messages.ResponsePacket;
+        }
+        interface FromHost {
+            startGame: Room;
+            endGame: void;
+            sendPacket: Messages.Packet;
+            forceClear: void;
+        }
+        interface ToClient {
+            playerInfo: Player;
+            loadGame: string;
+            unloadGame: void;
+            onPacket: Messages.Packet;
+            onClear: void;
+        }
+        interface FromClient {
+            joinRoom: JoinRequest;
+            returnResponse: Messages.ResponsePacket;
+        }
+    }
+    namespace Actions {
+        interface ToHost {
             playerJoined(player: Player): void;
             playerReturned(packet: Messages.ResponsePacket): void;
         }
@@ -77,16 +100,16 @@ declare namespace PartyGameShow {
         }
     }
     interface Listener<Events> {
-        addListeners(listeners: Partial<Events>): void;
-        removeListeners(listeners: Partial<Events>): void;
+        addListeners(listeners: { [E in keyof Events]: (data: Events[E]) => void }): void;
+        removeListeners(listeners: { [E in keyof Events]: (data: Events[E]) => void }): void;
     }
     namespace Services {
-        interface Host extends Events.FromHost, Listener<Events.ToHost> {}
-        interface Client extends Events.FromClient, Listener<Events.ToClient> {}
+        interface Host extends Actions.FromHost, Listener<Events.ToHost> {}
+        interface Client extends Actions.FromClient, Listener<Events.ToClient> {}
     }
     namespace Managers {
-        interface Host extends Events.ToHost, Listener<Events.FromHost> {}
-        interface Client extends Events.ToClient, Listener<Events.FromClient> {}
+        interface Host extends Actions.ToHost, Listener<Events.FromHost> {}
+        interface Client extends Actions.ToClient, Listener<Events.FromClient> {}
     }
     namespace View {
         interface Host {

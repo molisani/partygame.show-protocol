@@ -3,13 +3,15 @@
         "target": "es6",
         "module": "commonjs",
         "noEmit": true,
+        "declaration": true,
         "noImplicitAny": false,
         "noImplicitThis": true,
         "strictNullChecks": true,
         "alwaysStrict": true
     },
     "files": [
-        "partygameshow.d.ts"
+        "partygameshow.d.ts",
+        "test.ts"
     ],
     "exclude": [
         "node_modules"
