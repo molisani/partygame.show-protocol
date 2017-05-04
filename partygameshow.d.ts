@@ -83,16 +83,16 @@ declare namespace PartyGameShow {
         }
         interface FromHost {
             startGame(room: Room): void;
-            endGame(): void;
+            endGame(_: void): void;
             sendPacket(packet: Messages.Packet): void;
-            forceClear(): void;
+            forceClear(_: void): void;
         }
         interface ToClient {
             playerInfo(player: Player): void;
             loadGame(gametype: string): void;
-            unloadGame(): void;
+            unloadGame(_: void): void;
             onPacket(packet: Messages.Packet): void;
-            onClear(): void;
+            onClear(_: void): void;
         }
         interface FromClient {
             joinRoom(request: JoinRequest): void;

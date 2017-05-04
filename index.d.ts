@@ -1,5 +1,5 @@
 /*
- * partygame.show 1.0.0-alpha.4 (https://github.com/molisani/partygame.show-protocol) 
+ * partygame.show 1.0.0-alpha.5 (https://github.com/molisani/partygame.show-protocol) 
  * Copyright 2017 Michael Molisani
  * Licensed under LGPL-3.0 (https://github.com/molisani/partygame.show-protocol/blob/master/LICENSE)
  */
@@ -88,16 +88,16 @@ declare namespace PartyGameShow {
         }
         interface FromHost {
             startGame(room: Room): void;
-            endGame(): void;
+            endGame(_: void): void;
             sendPacket(packet: Messages.Packet): void;
-            forceClear(): void;
+            forceClear(_: void): void;
         }
         interface ToClient {
             playerInfo(player: Player): void;
             loadGame(gametype: string): void;
-            unloadGame(): void;
+            unloadGame(_: void): void;
             onPacket(packet: Messages.Packet): void;
-            onClear(): void;
+            onClear(_: void): void;
         }
         interface FromClient {
             joinRoom(request: JoinRequest): void;
