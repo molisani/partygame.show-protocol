@@ -1,6 +1,6 @@
 {
   "name": "partygame.show",
-  "version": "1.0.0-alpha.5",
+  "version": "1.0.0-alpha.6",
   "description": "Protocol for developing games for the PartyGame.Show framework",
   "types": "index.d.ts",
   "scripts": {
@@ -18,10 +18,10 @@
     "grunt-contrib-clean": "^1.1.0",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-sed": "^0.1.1",
-    "grunt-ts": "^6.0.0-beta.15",
+    "grunt-ts": "^6.0.0-beta.16",
     "grunt-tslint": "^5.0.1",
     "load-grunt-tasks": "^3.5.2",
-    "tslint": "^5.2.0",
-    "typescript": "^2.3.2"
+    "tslint": "^5.4.2",
+    "typescript": "^2.3.4"
   }
 }
