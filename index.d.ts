@@ -62,17 +62,17 @@ declare namespace PartyGameShow {
     }
     interface Packet {
       msgID: string;
-      recipients: string[];
+      recipientIDs: string[];
       payload: Payload;
       expiresAfter: number;
       notify: boolean;
     }
     interface ResponsePayload extends Payload {
-      author: string;
+      authorID: string;
     }
     interface ResponsePacket {
       msgID: string;
-      player: Player;
+      playerID: string;
       response: ResponsePayload;
     }
   }
