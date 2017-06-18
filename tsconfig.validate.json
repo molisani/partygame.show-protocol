@@ -3,7 +3,6 @@
         "target": "es6",
         "module": "commonjs",
         "noEmit": true,
-        "declaration": false,
         "noImplicitAny": false,
         "noImplicitThis": true,
         "strictNullChecks": true,
@@ -11,9 +10,7 @@
     },
     "include": [
         "partygameshow.d.ts",
-        "validate.ts",
-        "mock.ts",
-        "test.ts"
+        "validate.ts"
     ],
     "exclude": [
         "node_modules"

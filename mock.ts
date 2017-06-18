@@ -1,9 +1,36 @@
 
+import sinon = require("sinon");
+
 type Listener<T> = (data: T) => void;
 
 type EventListenerRegistry<Events> = {
   [E in keyof Events]: Listener<Events[E]>[];
 };
+
+export interface Logger {
+  withPrefix(prefix: string): Logger;
+  log(message: string): void;
+}
+
+export class ConsoleLogger implements Logger {
+  constructor(private _prefix: string = "") {
+  }
+  withPrefix(prefix: string): Logger {
+    return new ConsoleLogger(this._prefix + prefix);
+  }
+  log(message: string): void {
+    console.log(`${this._prefix}${message}`);
+  }
+}
+
+export class NullLogger implements Logger {
+  withPrefix(prefix: string): Logger {
+    return this;
+  }
+  log(message: string): void {
+    // no-op
+  }
+}
 
 class EventEmitter<Events> {
   private _registry: EventListenerRegistry<Events> = {} as EventListenerRegistry<Events>;
@@ -11,8 +38,8 @@ class EventEmitter<Events> {
     this._registry[event] = this._registry[event] || [];
     this._registry[event].push(listener);
   }
-  public removeEventListener<E extends keyof Events>(event: E): void
-  public removeEventListener<E extends keyof Events>(event: E, listener: (data: Events[E]) => void): void
+  public removeEventListener<E extends keyof Events>(event: E): void;
+  public removeEventListener<E extends keyof Events>(event: E, listener: (data: Events[E]) => void): void;
   public removeEventListener<E extends keyof Events>(event: E, listener?: (data: Events[E]) => void): void {
     if (listener === undefined) {
       this._registry[event] = [];
@@ -29,47 +56,49 @@ class EventEmitter<Events> {
 }
 
 class MockHostService implements PartyGameShow.Services.Host {
-  constructor(private _from: EventEmitter<PartyGameShow.Events.FromHost>, private _to: EventEmitter<PartyGameShow.Events.ToHost>) {
+  private _logger: Logger;
+  constructor(private _from: EventEmitter<PartyGameShow.Events.FromHost>, private _to: EventEmitter<PartyGameShow.Events.ToHost>, logger: Logger) {
+    this._logger = logger.withPrefix("-host.");
   }
   listGames(): void {
     setTimeout(() => {
-      console.log(`-host.listGames()`);
+      this._logger.log(`listGames()`);
       this._from.dispatchEvent("listGames", undefined);
     }, Math.random() * 10);
   }
   startRoom(): void {
     setTimeout(() => {
-      console.log(`-host.startRoom()`);
+      this._logger.log(`startRoom()`);
       this._from.dispatchEvent("startRoom", undefined);
     }, Math.random() * 10);
   }
   endRoom(): void {
     setTimeout(() => {
-      console.log(`-host.endRoom()`);
+      this._logger.log(`endRoom()`);
       this._from.dispatchEvent("endRoom", undefined);
     }, Math.random() * 10);
   }
   startGame(game: PartyGameShow.Requests.NewGame): void {
     setTimeout(() => {
-      console.log(`-host.startGame(type="${game.gametype}", players=${game.playerIDs})`);
+      this._logger.log(`startGame(type="${game.gametype}", players=${game.playerIDs})`);
       this._from.dispatchEvent("startGame", game);
     }, Math.random() * 10);
   }
   endGame(): void {
     setTimeout(() => {
-      console.log(`-host.endGame()`);
+      this._logger.log(`endGame()`);
       this._from.dispatchEvent("endGame", undefined);
     }, Math.random() * 10);
   }
   sendPacket(packet: PartyGameShow.Messages.Packet): void {
     setTimeout(() => {
-      console.log(`-host.sendPacket(msgID=${packet.msgID}, recipientIDs=${packet.recipientIDs})`);
+      this._logger.log(`sendPacket(msgID=${packet.msgID}, recipientIDs=${packet.recipientIDs})`);
       this._from.dispatchEvent("sendPacket", packet);
     }, Math.random() * 10);
   }
   forceClear(): void {
     setTimeout(() => {
-      console.log(`-host.forceClear()`);
+      this._logger.log(`forceClear()`);
       this._from.dispatchEvent("forceClear", undefined);
     }, Math.random() * 10);
   }
@@ -129,41 +158,49 @@ class MockHostService implements PartyGameShow.Services.Host {
 }
 
 class MockHostManager implements PartyGameShow.Managers.Host {
-  constructor(private _from: EventEmitter<PartyGameShow.Events.FromHost>, private _to: EventEmitter<PartyGameShow.Events.ToHost>) {
+  private _logger: Logger;
+  constructor(private _from: EventEmitter<PartyGameShow.Events.FromHost>, private _to: EventEmitter<PartyGameShow.Events.ToHost>, logger: Logger) {
+    this._logger = logger.withPrefix("+host.");
   }
   availableGames(games: PartyGameShow.Responses.AvailableGames): void {
     setTimeout(() => {
-      console.log(`+host.availableGames()`);
+      this._logger.log(`availableGames()`);
       this._to.dispatchEvent("availableGames", games);
     }, Math.random() * 10);
   }
   onRoom(room: PartyGameShow.Room): void {
     setTimeout(() => {
-      console.log(`+host.onRoom(room=${room.lobbyCode})`);
+      this._logger.log(`onRoom(room=${room.lobbyCode})`);
       this._to.dispatchEvent("onRoom", room);
+    }, Math.random() * 10);
+  }
+  gameContent(content: PartyGameShow.Responses.GameContent): void {
+    setTimeout(() => {
+      this._logger.log(`gameContent()`);
+      this._to.dispatchEvent("gameContent", content);
     }, Math.random() * 10);
   }
   playerJoined(player: PartyGameShow.Player): void {
     setTimeout(() => {
-      console.log(`+host.playerJoined(playerID=${player.playerID})`);
+      this._logger.log(`playerJoined(playerID=${player.playerID})`);
       this._to.dispatchEvent("playerJoined", player);
     }, Math.random() * 10);
   }
   playerReady(player: PartyGameShow.Player): void {
     setTimeout(() => {
-      console.log(`+host.playerReady(playerID=${player.playerID})`);
+      this._logger.log(`playerReady(playerID=${player.playerID})`);
       this._to.dispatchEvent("playerReady", player);
     }, Math.random() * 10);
   }
   playerUpdated(player: PartyGameShow.Player): void {
     setTimeout(() => {
-      console.log(`+host.playerUpdated(playerID=${player.playerID})`);
+      this._logger.log(`playerUpdated(playerID=${player.playerID})`);
       this._to.dispatchEvent("playerUpdated", player);
     }, Math.random() * 10);
   }
   playerReturned(packet: PartyGameShow.Messages.ResponsePacket): void {
     setTimeout(() => {
-      console.log(`+host.playerReturned(msgID=${packet.msgID}, playerID=${packet.playerID})`);
+      this._logger.log(`playerReturned(msgID=${packet.msgID}, playerID=${packet.playerID})`);
       this._to.dispatchEvent("playerReturned", packet);
     }, Math.random() * 10);
   }
@@ -229,29 +266,31 @@ class MockHostManager implements PartyGameShow.Managers.Host {
 }
 
 class MockClientService implements PartyGameShow.Services.Client {
-  constructor(private _from: EventEmitter<PartyGameShow.Events.FromClient>, private _to: EventEmitter<PartyGameShow.Events.ToClient>) {
+  private _logger: Logger;
+  constructor(private _from: EventEmitter<PartyGameShow.Events.FromClient>, private _to: EventEmitter<PartyGameShow.Events.ToClient>, logger: Logger) {
+    this._logger = logger.withPrefix("-client.");
   }
   joinRoom(request: PartyGameShow.Requests.JoinRoom): void {
     setTimeout(() => {
-      console.log(`-client.joinRoom(playerID=${request.playerID}, lobbyCode=${request.lobbyCode})`);
+      this._logger.log(`joinRoom(playerID=${request.playerID}, lobbyCode=${request.lobbyCode})`);
       this._from.dispatchEvent("joinRoom", request);
     }, Math.random() * 10);
   }
   updatePlayerInfo(request: Partial<PartyGameShow.Player>): void {
     setTimeout(() => {
-      console.log(`-client.updatePlayerInfo(playerID=${request.playerID}, displayName=${request.displayName}, color=${request.color})`);
+      this._logger.log(`updatePlayerInfo(playerID=${request.playerID}, displayName=${request.displayName}, color=${request.color})`);
       this._from.dispatchEvent("updatePlayerInfo", request);
     }, Math.random() * 10);
   }
   gameReady(): void {
     setTimeout(() => {
-      console.log(`-client.gameReady()`);
+      this._logger.log(`gameReady()`);
       this._from.dispatchEvent("gameReady", undefined);
     }, Math.random() * 10);
   }
   returnResponse(packet: PartyGameShow.Messages.ResponsePacket): void {
     setTimeout(() => {
-      console.log(`-client.requestResponse(playerID=${packet.playerID}, msgID=${packet.msgID})`);
+      this._logger.log(`requestResponse(playerID=${packet.playerID}, msgID=${packet.msgID})`);
       this._from.dispatchEvent("returnResponse", packet);
     }, Math.random() * 10);
   }
@@ -305,35 +344,37 @@ class MockClientService implements PartyGameShow.Services.Client {
 }
 
 class MockClientManager implements PartyGameShow.Managers.Client {
-  constructor(private _from: EventEmitter<PartyGameShow.Events.FromClient>, private _to: EventEmitter<PartyGameShow.Events.ToClient>) {
+  private _logger: Logger;
+  constructor(private _from: EventEmitter<PartyGameShow.Events.FromClient>, private _to: EventEmitter<PartyGameShow.Events.ToClient>, logger: Logger) {
+    this._logger = logger.withPrefix("+client.");
   }
   playerInfo(player: PartyGameShow.Player): void {
     setTimeout(() => {
-      console.log(`+client.playerInfo(playerID=${player.playerID}, displayName=${player.displayName}, color=${player.color})`);
+      this._logger.log(`playerInfo(playerID=${player.playerID}, displayName=${player.displayName}, color=${player.color})`);
       this._to.dispatchEvent("playerInfo", player);
     }, Math.random() * 10);
   }
   loadGame(game: PartyGameShow.Responses.LoadGame): void {
     setTimeout(() => {
-      console.log(`+client.loadGame(gametype=${game.gametype}, playerIDs=${game.playerIDs})`);
+      this._logger.log(`loadGame(gametype=${game.gametype}, playerIDs=${game.playerIDs})`);
       this._to.dispatchEvent("loadGame", game);
     }, Math.random() * 10);
   }
   unloadGame(): void {
     setTimeout(() => {
-      console.log(`+client.unloadGame()`);
+      this._logger.log(`unloadGame()`);
       this._to.dispatchEvent("unloadGame", undefined);
     }, Math.random() * 10);
   }
   onPacket(packet: PartyGameShow.Messages.Packet): void {
     setTimeout(() => {
-      console.log(`+client.onPacket(msgID=${packet.msgID})`);
+      this._logger.log(`onPacket(msgID=${packet.msgID})`);
       this._to.dispatchEvent("onPacket", packet);
     }, Math.random() * 10);
   }
   onClear(): void {
     setTimeout(() => {
-      console.log(`+client.onClear()`);
+      this._logger.log(`onClear()`);
       this._to.dispatchEvent("onClear", undefined);
     }, Math.random() * 10);
   }
@@ -380,7 +421,6 @@ class MockClientManager implements PartyGameShow.Managers.Client {
   }
 }
 
-
 class MockServer implements PartyGameShow.Server {
   private _room: PartyGameShow.Room;
   private _clients: { [playerID: string]: PartyGameShow.Managers.Client } = {};
@@ -395,28 +435,29 @@ class MockServer implements PartyGameShow.Server {
     this._host.availableGames({
       games: [
         {
-          gametype: 'sketchy',
+          gametype: "sketchy",
           metadata: {
             active: true,
-            title: '#sketchy',
-            subtitle: 'sketchy subtitle',
+            title: "#sketchy",
+            subtitle: "sketchy subtitle",
             minPlayers: 3,
-            version: '1.0.0',
-          }
-        }
-      ]
+            version: "1.0.0",
+          },
+        },
+      ],
     });
   }
   startRoom(): void {
     this._room = {
-      "roomID": "mock-room-id",
-      "lobbyCode": "ABCDEFG",
+      roomID: "mock-room-id",
+      lobbyCode: "ABCDEFG",
     };
     setTimeout(() => {
       this._host.onRoom(this._room);
     }, 0);
   }
   endRoom(): void {
+    //
   }
   startGame(game: PartyGameShow.Requests.NewGame): void {
     game.playerIDs.forEach((playerID) => {
@@ -425,6 +466,22 @@ class MockServer implements PartyGameShow.Server {
         playerIDs: game.playerIDs,
         reload: false,
       });
+    });
+    this._host.gameContent({
+      base: {
+        packID: `${game.gametype}-base`,
+        data: "BASE",
+      },
+      extra: [
+        {
+          packID: `${game.gametype}-extra:0`,
+          data: "EXTRA-0",
+        },
+        {
+          packID: `${game.gametype}-extra:1`,
+          data: "EXTRA-1",
+        },
+      ],
     });
   }
   endGame(): void {
@@ -444,7 +501,7 @@ class MockServer implements PartyGameShow.Server {
         const player: PartyGameShow.Player = {
           playerID: request.playerID,
           displayName: request.playerID,
-          color: '#000000',
+          color: "#000000",
         };
         this._clients[player.playerID] = client;
         client.addListener("updatePlayerInfo", (playerUpdate) => {
@@ -469,7 +526,7 @@ class MockServer implements PartyGameShow.Server {
   }
 }
 
-class MockHostApp implements PartyGameShow.Signals.FromHost {
+export class MockHostApp implements PartyGameShow.Signals.FromHost {
   private _players: PartyGameShow.Player[] = [];
   constructor(private _service: PartyGameShow.Services.Host) {
     this._service.addListener("playerJoined", (player) => {
@@ -479,7 +536,10 @@ class MockHostApp implements PartyGameShow.Signals.FromHost {
   get players(): PartyGameShow.Player[] {
     return this._players;
   }
-  listGames(): Promise<PartyGameShow.Game.Loader[]> {
+  addPlayerJoinedListener(listener: (player: PartyGameShow.Player) => void): void {
+    return this._service.addListener("playerJoined", listener);
+  }
+  listGames(): Promise<PartyGameShow.Responses.AvailableGames> {
     return new Promise((resolve) => {
       this._service.addOneTimeListener("availableGames", resolve);
       this._service.listGames(undefined);
@@ -508,7 +568,7 @@ class MockHostApp implements PartyGameShow.Signals.FromHost {
         } else {
           playersReady[player.playerID] = true;
         }
-      }
+      };
       this._service.addListener("playerReady", callback);
       this._service.startGame(game);
     });
@@ -516,21 +576,20 @@ class MockHostApp implements PartyGameShow.Signals.FromHost {
   endGame(): void {
     this._service.endGame(undefined);
   }
-  sendPacket(packet: PartyGameShow.Messages.Packet): Promise<PartyGameShow.Messages.ResponsePacket> {
+  sendPacket(packet: PartyGameShow.Messages.Packet): Promise<PartyGameShow.PlayerMap<PartyGameShow.Messages.ResponsePacket>> {
     return new Promise((resolve) => {
       let playerCountdown = packet.recipientIDs.length;
-      const playersReturned: { [playerID: string]: boolean } = {};
+      const playersReturned: PartyGameShow.PlayerMap<PartyGameShow.Messages.ResponsePacket> = {};
       const callback = (response: PartyGameShow.Messages.ResponsePacket) => {
         if (packet.msgID === response.msgID) {
-          if (!playersReturned[response.playerID]) {
+          if (playersReturned[response.playerID] === undefined) {
             playerCountdown--;
             if (playerCountdown === 0) {
               this._service.removeListener("playerReturned", callback);
-              resolve();
+              resolve(playersReturned);
             }
-          } else {
-            playersReturned[response.playerID] = true;
           }
+          playersReturned[response.playerID] = response;
         }
       };
       this._service.addListener("playerReturned", callback);
@@ -542,158 +601,85 @@ class MockHostApp implements PartyGameShow.Signals.FromHost {
   }
 }
 
+export interface PlayerDefinition {
+  info: PartyGameShow.Player;
+  responses: {
+    [msgID: string]: PartyGameShow.Messages.ResponsePayload;
+  };
+}
 
-const host = new EventEmitter<PartyGameShow.Events.FromHost & PartyGameShow.Events.ToHost>();
-
-
-
-const hostService = new MockHostService(host, host);
-const hostManager = new MockHostManager(host, host);
-
-interface ClientConnection {
+export interface ClientConnection {
   playerID: string;
   service: PartyGameShow.Services.Client;
   manager: PartyGameShow.Managers.Client;
 }
 
-function createClient(playerID: string) {
+function createClient(playerID: string, logger: Logger): ClientConnection {
   const client = new EventEmitter<PartyGameShow.Events.FromClient & PartyGameShow.Events.ToClient>();
   return {
-    playerID: playerID,
-    service: new MockClientService(client, client),
-    manager: new MockClientManager(client, client),
+    playerID,
+    service: new MockClientService(client, client, logger),
+    manager: new MockClientManager(client, client, logger),
   };
 }
 
-const alpha = createClient("alpha");
-const bravo = createClient("bravo");
-const charlie = createClient("charlie");
+export type HostSpy = {
+  [Event in keyof PartyGameShow.Events.ToHost]: sinon.SinonSpy;
+};
 
-const clients = [alpha, bravo, charlie];
-const clientManagers = [alpha.manager, bravo.manager, charlie.manager];
-
-const server = new MockServer(hostManager, clientManagers);
-
-const hostApp = new MockHostApp(hostService);
-
-interface Message {
-  hostPacket: PartyGameShow.Messages.Packet,
-  clientResponses: {
-    [playerID: string]: PartyGameShow.Messages.ResponsePacket,
-  },
+export interface MockEnvironment {
+  hostApp: MockHostApp;
+  hostSpy: HostSpy;
+  clientConnections: ClientConnection[];
 }
 
-function createMessage(msgID: string) {
-  return {
-    hostPacket: {
-      msgID: msgID,
-      recipientIDs: ["alpha", "bravo", "charlie"],
-      payload: {
-        type: "",
-      },
-      expiresAfter: 0,
-      notify: true,
-    },
-    clientResponses: {
-      "alpha": {
-        msgID: msgID,
-        playerID: "alpha",
-        response: {
-          type: "",
-          authorID: "alpha",
-        }
-      },
-      "bravo": {
-        msgID: msgID,
-        playerID: "bravo",
-        response: {
-          type: "",
-          authorID: "bravo",
-        }
-      },
-      "charlie": {
-        msgID: msgID,
-        playerID: "charlie",
-        response: {
-          type: "",
-          authorID: "charlie",
-        }
-      },
-    }
-  };
-}
+export function buildMockEnvironment(players: PlayerDefinition[], logger: Logger): MockEnvironment {
+  const host = new EventEmitter<PartyGameShow.Events.FromHost & PartyGameShow.Events.ToHost>();
 
+  const hostService = new MockHostService(host, host, logger);
+  const hostManager = new MockHostManager(host, host, logger);
 
-class TestRunner {
-  constructor(private _host: MockHostApp, private _clients: ClientConnection[]) { }
-  private processMessage(message: Message): Promise<any> {
-    this._clients.forEach((client) => {
-      const response = message.clientResponses[client.playerID];
-      if (response !== undefined) {
-        client.service.addOneTimeListener("onPacket", (packet) => {
-          console.log(`playetID=${client.playerID} returning response for msgID=${packet.msgID}=${response.msgID}`);
-          client.service.returnResponse(response);
+  const clients = players.map((player) => {
+    const clientLogger = logger.withPrefix(player.info.playerID);
+    const client = createClient(player.info.playerID, clientLogger);
+    hostService.addListener("playerJoined", (newPlayer) => {
+      if (newPlayer.playerID === player.info.playerID) {
+        client.manager.playerInfo(player.info);
+      }
+    });
+    client.service.addListener("loadGame", (game) => {
+      client.service.gameReady(undefined);
+    });
+    client.service.addListener("onPacket", (packet) => {
+      const response = player.responses[packet.msgID];
+      if (response) {
+        client.service.returnResponse({
+          msgID: packet.msgID,
+          playerID: player.info.playerID,
+          response,
         });
       }
     });
-    return this._host.sendPacket(message.hostPacket).then(() => {
-      console.log(`done sending message: ${message.hostPacket.msgID}`);
-    });
-  }
-  public connect(): Promise<any> {
-    return this._host.startRoom().then((room) => {
-      this._clients.forEach((client) => {
-        client.service.joinRoom({
-          playerID: client.playerID,
-          lobbyCode: room.lobbyCode,
-        });
-      });
-      const checkForPlayers = (): Promise<any> => {
-        if (this._host.players.length !== this._clients.length) {
-          console.log(`only ${this._host.players.length} out of ${this._clients.length} players joined`);
-          return new Promise((resolve) => {
-            setTimeout(() => {
-              resolve(checkForPlayers());
-            });
-          });
-        } else {
-          console.log(`all players joined`);
-          return Promise.resolve();
-        }
-      };
-      return checkForPlayers();
-    });
-  }
-  public simpleGame(messages: Message[]): Promise<any> {
-    this._clients.forEach((client) => {
-      client.service.addOneTimeListener("loadGame", (game) => {
-        client.service.gameReady(undefined);
-      });
-    });
-    const newGame = {
-      gametype: "test",
-      playerIDs: this._clients.map((client) => client.playerID),
-    };
-    return this._host.startGame(newGame).then(() => {
-      return messages.reduce<Promise<any>>((prev, message) => {
-        return prev.then(() => this.processMessage(message));
-      }, Promise.resolve());
-    });
-  }
-}
-
-const testRunner = new TestRunner(hostApp, clients);
-
-testRunner.connect().then(() => {
-  return testRunner.simpleGame([
-    createMessage("test-msg:0"),
-    createMessage("test-msg:1"),
-    createMessage("test-msg:2"),
-  ]).then(() => {
-    console.log(`game done`);
+    return client;
   });
-}).then(() => {
-  console.log(`room done`);
-});
 
+  const server = new MockServer(hostManager, clients.map((client) => client.manager));
 
+  const hostSpy: HostSpy = {
+    availableGames: sinon.spy(hostManager, "availableGames"),
+    onRoom: sinon.spy(hostManager, "onRoom"),
+    gameContent: sinon.spy(hostManager, "gameContent"),
+    playerJoined: sinon.spy(hostManager, "playerJoined"),
+    playerReady: sinon.spy(hostManager, "playerReady"),
+    playerReturned: sinon.spy(hostManager, "playerReturned"),
+    playerUpdated: sinon.spy(hostManager, "playerUpdated"),
+  };
+
+  const hostApp = new MockHostApp(hostService);
+
+  return {
+    hostApp,
+    hostSpy,
+    clientConnections: clients,
+  };
+}

@@ -2,7 +2,6 @@
     "compilerOptions": {
         "target": "es6",
         "module": "commonjs",
-        "noEmit": true,
         "declaration": false,
         "noImplicitAny": false,
         "noImplicitThis": true,
@@ -11,7 +10,6 @@
     },
     "include": [
         "partygameshow.d.ts",
-        "validate.ts",
         "mock.ts",
         "test.ts"
     ],
