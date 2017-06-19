@@ -58,7 +58,7 @@ class TestHostManager implements PartyGameShow.Managers.Host {
   onRoom(room: PartyGameShow.Room): void {
     throw new Error("Method not implemented.");
   }
-  gameContent(content: PartyGameShow.Responses.GameContent): void {
+  gameContent(content: PartyGameShow.Game.Content): void {
     throw new Error("Method not implemented.");
   }
   playerJoined(player: PartyGameShow.Player): void {

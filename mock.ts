@@ -174,7 +174,7 @@ class MockHostManager implements PartyGameShow.Managers.Host {
       this._to.dispatchEvent("onRoom", room);
     }, Math.random() * 10);
   }
-  gameContent(content: PartyGameShow.Responses.GameContent): void {
+  gameContent(content: PartyGameShow.Game.Content): void {
     setTimeout(() => {
       this._logger.log(`gameContent()`);
       this._to.dispatchEvent("gameContent", content);
@@ -470,16 +470,22 @@ class MockServer implements PartyGameShow.Server {
     this._host.gameContent({
       base: {
         packID: `${game.gametype}-base`,
-        data: "BASE",
+        data: {
+          content: "BASE",
+        },
       },
       extra: [
         {
           packID: `${game.gametype}-extra:0`,
-          data: "EXTRA-0",
+          data: {
+            content: "EXTRA-0",
+          },
         },
         {
           packID: `${game.gametype}-extra:1`,
-          data: "EXTRA-1",
+          data: {
+            content: "EXTRA-1",
+          },
         },
       ],
     });

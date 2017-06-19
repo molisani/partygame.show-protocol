@@ -153,16 +153,22 @@ describe("Host", () => {
         expect(env.hostSpy.gameContent.getCall(0).args[0]).to.deep.equal({
           base: {
             packID: "test-gametype-base",
-            data: "BASE",
+            data: {
+              content: "BASE",
+            },
           },
           extra: [
             {
               packID: "test-gametype-extra:0",
-              data: "EXTRA-0",
+              data: {
+                content: "EXTRA-0",
+              },
             },
             {
               packID: "test-gametype-extra:1",
-              data: "EXTRA-1",
+              data: {
+                content: "EXTRA-1",
+              },
             },
           ],
         });

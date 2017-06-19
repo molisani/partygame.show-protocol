@@ -12,6 +12,14 @@ declare namespace PartyGameShow {
       gametype: string;
       metadata: Metadata;
     }
+    interface ContentPack {
+      packID: string;
+      data: object;
+    }
+    interface Content {
+      base: ContentPack;
+      extra: ContentPack[];
+    }
   }
   interface Room {
     roomID?: string;
@@ -35,14 +43,6 @@ declare namespace PartyGameShow {
   namespace Responses {
     interface AvailableGames {
       games: Game.Loader[];
-    }
-    interface GameContentPack {
-      packID: string;
-      data: any;
-    }
-    interface GameContent {
-      base: GameContentPack;
-      extra: GameContentPack[];
     }
     interface LoadGame extends Requests.NewGame {
       reload: boolean;
@@ -78,7 +78,7 @@ declare namespace PartyGameShow {
     interface ToHost {
       availableGames: Responses.AvailableGames;
       onRoom: Room;
-      gameContent: Responses.GameContent;
+      gameContent: Game.Content;
       playerJoined: Player;
       playerUpdated: Player;
       playerReady: Player;
@@ -111,7 +111,7 @@ declare namespace PartyGameShow {
     interface ToHost {
       availableGames(games: Responses.AvailableGames): void;
       onRoom(room: Room): void;
-      gameContent(content: Responses.GameContent): void;
+      gameContent(content: Game.Content): void;
       playerJoined(player: Player): void;
       playerUpdated(player: Player): void;
       playerReady(player: Player): void;
