@@ -204,6 +204,12 @@ class MockHostManager implements PartyGameShow.Managers.Host {
       this._to.dispatchEvent("playerReturned", packet);
     }, Math.random() * 10);
   }
+  onError(err: object): void {
+    setTimeout(() => {
+      this._logger.log(`onError(err=${err})`);
+      this._to.dispatchEvent("onError", err);
+    }, Math.random() * 10);
+  }
   addListener<E extends keyof PartyGameShow.Events.FromHost>(event: E, listener: (data: PartyGameShow.Events.FromHost[E]) => void): void {
     this._from.addEventListener(event, listener);
   }
@@ -270,16 +276,22 @@ class MockClientService implements PartyGameShow.Services.Client {
   constructor(private _from: EventEmitter<PartyGameShow.Events.FromClient>, private _to: EventEmitter<PartyGameShow.Events.ToClient>, logger: Logger) {
     this._logger = logger.withPrefix("-client.");
   }
-  joinRoom(request: PartyGameShow.Requests.JoinRoom): void {
+  getPlayerInfo(_: void): void {
     setTimeout(() => {
-      this._logger.log(`joinRoom(playerID=${request.playerID}, lobbyCode=${request.lobbyCode})`);
-      this._from.dispatchEvent("joinRoom", request);
+      this._logger.log(`getPlayerInfo()`);
+      this._from.dispatchEvent("getPlayerInfo", undefined);
     }, Math.random() * 10);
   }
   updatePlayerInfo(request: Partial<PartyGameShow.Player>): void {
     setTimeout(() => {
       this._logger.log(`updatePlayerInfo(playerID=${request.playerID}, displayName=${request.displayName}, color=${request.color})`);
       this._from.dispatchEvent("updatePlayerInfo", request);
+    }, Math.random() * 10);
+  }
+  joinRoom(request: PartyGameShow.Requests.JoinRoom): void {
+    setTimeout(() => {
+      this._logger.log(`joinRoom(playerID=${request.playerID}, lobbyCode=${request.lobbyCode})`);
+      this._from.dispatchEvent("joinRoom", request);
     }, Math.random() * 10);
   }
   gameReady(): void {
@@ -354,6 +366,12 @@ class MockClientManager implements PartyGameShow.Managers.Client {
       this._to.dispatchEvent("playerInfo", player);
     }, Math.random() * 10);
   }
+  joinedRoom(room: PartyGameShow.Room): void {
+    setTimeout(() => {
+      this._logger.log(`joinedRoom(lobbyCode=${room.lobbyCode}, roomID=${room.roomID})`);
+      this._to.dispatchEvent("joinedRoom", room);
+    }, Math.random() * 10);
+  }
   loadGame(game: PartyGameShow.Responses.LoadGame): void {
     setTimeout(() => {
       this._logger.log(`loadGame(gametype=${game.gametype}, playerIDs=${game.playerIDs})`);
@@ -376,6 +394,12 @@ class MockClientManager implements PartyGameShow.Managers.Client {
     setTimeout(() => {
       this._logger.log(`onClear()`);
       this._to.dispatchEvent("onClear", undefined);
+    }, Math.random() * 10);
+  }
+  onError(err: object): void {
+    setTimeout(() => {
+      this._logger.log(`onError(err=${err})`);
+      this._to.dispatchEvent("onError", err);
     }, Math.random() * 10);
   }
   addListener<E extends keyof PartyGameShow.Events.FromClient>(event: E, listener: (data: PartyGameShow.Events.FromClient[E]) => void): void {
@@ -679,6 +703,7 @@ export function buildMockEnvironment(players: PlayerDefinition[], logger: Logger
     playerReady: sinon.spy(hostManager, "playerReady"),
     playerReturned: sinon.spy(hostManager, "playerReturned"),
     playerUpdated: sinon.spy(hostManager, "playerUpdated"),
+    onError: sinon.spy(hostManager, "onError"),
   };
 
   const hostApp = new MockHostApp(hostService);

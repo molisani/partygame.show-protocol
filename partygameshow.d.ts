@@ -83,6 +83,7 @@ declare namespace PartyGameShow {
       playerUpdated: Player;
       playerReady: Player;
       playerReturned: Messages.ResponsePacket;
+      onError: object;
     }
     interface FromHost {
       listGames: void;
@@ -95,14 +96,17 @@ declare namespace PartyGameShow {
     }
     interface ToClient {
       playerInfo: Player;
+      joinedRoom: Room;
       loadGame: Responses.LoadGame;
       unloadGame: void;
       onPacket: Messages.Packet;
       onClear: void;
+      onError: object;
     }
     interface FromClient {
-      joinRoom: Requests.JoinRoom;
+      getPlayerInfo: void;
       updatePlayerInfo: Partial<Player>;
+      joinRoom: Requests.JoinRoom;
       gameReady: void;
       returnResponse: Messages.ResponsePacket;
     }
@@ -116,6 +120,7 @@ declare namespace PartyGameShow {
       playerUpdated(player: Player): void;
       playerReady(player: Player): void;
       playerReturned(packet: Messages.ResponsePacket): void;
+      onError(err: object): void;
     }
     interface FromHost {
       listGames(_: void): void;
@@ -128,14 +133,17 @@ declare namespace PartyGameShow {
     }
     interface ToClient {
       playerInfo(player: Player): void;
+      joinedRoom(room: Room): void;
       loadGame(game: Responses.LoadGame): void;
       unloadGame(_: void): void;
       onPacket(packet: Messages.Packet): void;
       onClear(_: void): void;
+      onError(err: object): void;
     }
     interface FromClient {
-      joinRoom(request: Requests.JoinRoom): void;
+      getPlayerInfo(_: void): void;
       updatePlayerInfo(request: Partial<Player>): void;
+      joinRoom(request: Requests.JoinRoom): void;
       gameReady(_: void): void;
       returnResponse(packet: Messages.ResponsePacket): void;
     }

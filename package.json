@@ -1,6 +1,6 @@
 {
   "name": "partygame.show",
-  "version": "1.0.0-alpha.8",
+  "version": "1.0.0-alpha.9",
   "description": "Protocol for developing games for the PartyGame.Show framework",
   "types": "index.d.ts",
   "scripts": {
