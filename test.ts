@@ -41,7 +41,7 @@ describe("Host", () => {
     const env = buildMockEnvironment([
       {
         info: player,
-        responses: {},
+        responses: Object.create(null),
       },
     ], logger);
 
@@ -124,7 +124,7 @@ describe("Host", () => {
         return new Promise((resolve) => {
           env.hostApp.addPlayerJoinedListener((p) => {
             if (p.playerID === player.playerID) {
-              resolve();
+              resolve(p);
             }
           });
         });
@@ -199,7 +199,7 @@ describe("Host", () => {
             },
           };
           return res;
-        }, {}));
+        }, Object.create(null)));
         const calledArgs = env.hostSpy.playerReturned.getCalls().map((call) => call.args[0]);
         expect(calledArgs).to.have.same.deep.members(players.map((player) => {
           return {

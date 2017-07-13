@@ -149,11 +149,10 @@ declare namespace PartyGameShow {
     }
   }
   interface Listener<Events> {
-    addListener<E extends keyof Events>(event: E, listener: (data: Events[E]) => void): void;
-    addOneTimeListener<E extends keyof Events>(event: E, listener: (data: Events[E]) => void): void;
-    removeListener<E extends keyof Events>(event: E, listener: (data: Events[E]) => void): void;
-    addListeners(listeners: {[E in keyof Events]?: (data: Events[E]) => void }): void;
-    removeListeners(listeners: {[E in keyof Events]?: (data: Events[E]) => void }): void;
+    addListener<E extends keyof Events, T>(event: E, listener: (this: T, data: Events[E]) => void, context?: T): string;
+    addOneTimeListener<E extends keyof Events, T>(event: E, listener: (this: T, data: Events[E]) => void, context?: T): string;
+    removeListener<E extends keyof Events>(event: E, id: string): void;
+    removeAllListeners<E extends keyof Events>(event: E);
   }
   namespace Services {
     interface Host extends Signals.FromHost, Listener<Events.ToHost> { }
