@@ -4,7 +4,7 @@
         "module": "commonjs",
         "noEmit": true,
         "declaration": false,
-        "noImplicitAny": false,
+        "noImplicitAny": true,
         "noImplicitThis": true,
         "strictNullChecks": true,
         "alwaysStrict": true

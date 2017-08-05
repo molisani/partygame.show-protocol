@@ -104,6 +104,12 @@ class MockHostService implements PartyGameShow.Services.Host {
       this._from.emit("endRoom", undefined);
     }, Math.random() * 10);
   }
+  managePlayers(players: PartyGameShow.Requests.ManagePlayers): void {
+    setTimeout(() => {
+      this._logger.log(`managePlayers(players=${players})`);
+      this._from.emit("managePlayers", players);
+    }, Math.random() * 10);
+  }
   startGame(game: PartyGameShow.Requests.NewGame): void {
     setTimeout(() => {
       this._logger.log(`startGame(type="${game.gametype}", players=${game.playerIDs})`);
@@ -165,10 +171,10 @@ class MockHostManager implements PartyGameShow.Managers.Host {
       this._to.emit("gameContent", content);
     }, Math.random() * 10);
   }
-  playerJoined(player: PartyGameShow.Player): void {
+  playerJoinedLobby(player: PartyGameShow.Player): void {
     setTimeout(() => {
       this._logger.log(`playerJoined(playerID=${player.playerID})`);
-      this._to.emit("playerJoined", player);
+      this._to.emit("playerJoinedLobby", player);
     }, Math.random() * 10);
   }
   playerReady(player: PartyGameShow.Player): void {
@@ -226,10 +232,10 @@ class MockClientService implements PartyGameShow.Services.Client {
       this._from.emit("updatePlayerInfo", request);
     }, Math.random() * 10);
   }
-  joinRoom(request: PartyGameShow.Requests.JoinRoom): void {
+  joinLobby(request: PartyGameShow.Requests.JoinLobby): void {
     setTimeout(() => {
-      this._logger.log(`joinRoom(playerID=${request.playerID}, lobbyCode=${request.lobbyCode})`);
-      this._from.emit("joinRoom", request);
+      this._logger.log(`joinLobby(playerID=${request.playerID}, lobbyCode=${request.lobbyCode})`);
+      this._from.emit("joinLobby", request);
     }, Math.random() * 10);
   }
   gameReady(): void {
@@ -273,6 +279,12 @@ class MockClientManager implements PartyGameShow.Managers.Client {
     setTimeout(() => {
       this._logger.log(`joinedRoom(lobbyCode=${room.lobbyCode}, roomID=${room.roomID})`);
       this._to.emit("joinedRoom", room);
+    }, Math.random() * 10);
+  }
+  roomClosed(_: void): void {
+    setTimeout(() => {
+      this._logger.log(`roomClosed()`);
+      this._to.emit("roomClosed", undefined);
     }, Math.random() * 10);
   }
   loadGame(game: PartyGameShow.Responses.LoadGame): void {
@@ -363,6 +375,14 @@ class MockServer implements PartyGameShow.Server {
   endRoom(): void {
     //
   }
+  managePlayers(players: PartyGameShow.Requests.ManagePlayers): void {
+    Object.keys(players).forEach((playerID) => {
+      const action = players[playerID];
+      if (action === "add") {
+        this._clients[playerID].joinedRoom(this._room);
+      }
+    });
+  }
   startGame(game: PartyGameShow.Requests.NewGame): void {
     game.playerIDs.forEach((playerID) => {
       this._clients[playerID].loadGame({
@@ -406,7 +426,7 @@ class MockServer implements PartyGameShow.Server {
     throw new Error("Method not implemented: forceClear");
   }
   clientConnected(client: PartyGameShow.Managers.Client) {
-    client.addListener("joinRoom", (request) => {
+    client.addListener("joinLobby", (request) => {
       if (request.lobbyCode === this._room.lobbyCode) {
         const player: PartyGameShow.Player = {
           playerID: request.playerID,
@@ -430,7 +450,7 @@ class MockServer implements PartyGameShow.Server {
           this._host.playerReturned(response);
         }, this);
         client.playerInfo(player);
-        this._host.playerJoined(player);
+        this._host.playerJoinedLobby(player);
       }
     }, this);
   }
@@ -439,15 +459,15 @@ class MockServer implements PartyGameShow.Server {
 export class MockHostApp implements PartyGameShow.Signals.FromHost {
   private _players: PartyGameShow.Player[] = [];
   constructor(private _service: PartyGameShow.Services.Host) {
-    this._service.addListener("playerJoined", (player) => {
+    this._service.addListener("playerJoinedLobby", (player) => {
       this._players.push(player);
     }, this);
   }
   get players(): PartyGameShow.Player[] {
     return this._players;
   }
-  addPlayerJoinedListener(listener: (player: PartyGameShow.Player) => void, context?: any): string {
-    return this._service.addListener("playerJoined", listener, context);
+  addPlayerJoinedLobbyListener(listener: (player: PartyGameShow.Player) => void, context?: any): string {
+    return this._service.addListener("playerJoinedLobby", listener, context);
   }
   listGames(): Promise<PartyGameShow.Responses.AvailableGames> {
     return new Promise((resolve) => {
@@ -463,6 +483,9 @@ export class MockHostApp implements PartyGameShow.Signals.FromHost {
   }
   endRoom(): void {
     this._service.endRoom(undefined);
+  }
+  managePlayers(players: PartyGameShow.Requests.ManagePlayers): void {
+    this._service.managePlayers(players);
   }
   startGame(game: PartyGameShow.Requests.NewGame): Promise<void> {
     return new Promise<void>((resolve) => {
@@ -554,7 +577,7 @@ export function buildMockEnvironment(players: PlayerDefinition[], logger: Logger
   const clients = players.map((player) => {
     const clientLogger = logger.withPrefix(player.info.playerID);
     const client = createClient(player.info.playerID, clientLogger);
-    hostService.addListener("playerJoined", (newPlayer) => {
+    hostService.addListener("playerJoinedLobby", (newPlayer) => {
       if (newPlayer.playerID === player.info.playerID) {
         client.manager.playerInfo(player.info);
       }
@@ -581,7 +604,7 @@ export function buildMockEnvironment(players: PlayerDefinition[], logger: Logger
     availableGames: sinon.spy(hostManager, "availableGames"),
     onRoom: sinon.spy(hostManager, "onRoom"),
     gameContent: sinon.spy(hostManager, "gameContent"),
-    playerJoined: sinon.spy(hostManager, "playerJoined"),
+    playerJoinedLobby: sinon.spy(hostManager, "playerJoinedLobby"),
     playerReady: sinon.spy(hostManager, "playerReady"),
     playerReturned: sinon.spy(hostManager, "playerReturned"),
     playerUpdated: sinon.spy(hostManager, "playerUpdated"),

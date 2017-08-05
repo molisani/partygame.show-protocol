@@ -1,5 +1,5 @@
 /*
- * partygame.show 1.0.0-alpha.10 (https://github.com/molisani/partygame.show-protocol) 
+ * partygame.show 1.0.0-alpha.12 (https://github.com/molisani/partygame.show-protocol) 
  * Copyright 2017 Michael Molisani
  * Licensed under LGPL-3.0 (https://github.com/molisani/partygame.show-protocol/blob/master/LICENSE)
  */
@@ -36,9 +36,12 @@ declare namespace PartyGameShow {
     color: string;
   }
   namespace Requests {
-    interface JoinRoom {
+    interface JoinLobby {
       playerID: string;
       lobbyCode: string;
+    }
+    interface ManagePlayers {
+      [playerID: string]: "add" | "kick" | "ban";
     }
     interface NewGame {
       gametype: string;
@@ -84,7 +87,7 @@ declare namespace PartyGameShow {
       availableGames: Responses.AvailableGames;
       onRoom: Room;
       gameContent: Game.Content;
-      playerJoined: Player;
+      playerJoinedLobby: Player;
       playerUpdated: Player;
       playerReady: Player;
       playerReturned: Messages.ResponsePacket;
@@ -94,6 +97,7 @@ declare namespace PartyGameShow {
       listGames: void;
       startRoom: void;
       endRoom: void;
+      managePlayers: Requests.ManagePlayers;
       startGame: Requests.NewGame;
       endGame: void;
       sendPacket: Messages.Packet;
@@ -102,6 +106,7 @@ declare namespace PartyGameShow {
     interface ToClient {
       playerInfo: Player;
       joinedRoom: Room;
+      roomClosed: void;
       loadGame: Responses.LoadGame;
       unloadGame: void;
       onPacket: Messages.Packet;
@@ -111,7 +116,7 @@ declare namespace PartyGameShow {
     interface FromClient {
       getPlayerInfo: void;
       updatePlayerInfo: Partial<Player>;
-      joinRoom: Requests.JoinRoom;
+      joinLobby: Requests.JoinLobby;
       gameReady: void;
       returnResponse: Messages.ResponsePacket;
     }
@@ -121,7 +126,7 @@ declare namespace PartyGameShow {
       availableGames(games: Responses.AvailableGames): void;
       onRoom(room: Room): void;
       gameContent(content: Game.Content): void;
-      playerJoined(player: Player): void;
+      playerJoinedLobby(player: Player): void;
       playerUpdated(player: Player): void;
       playerReady(player: Player): void;
       playerReturned(packet: Messages.ResponsePacket): void;
@@ -131,6 +136,7 @@ declare namespace PartyGameShow {
       listGames(_: void): void;
       startRoom(_: void): void;
       endRoom(_: void): void;
+      managePlayers(players: Requests.ManagePlayers): void;
       startGame(game: Requests.NewGame): void;
       endGame(_: void): void;
       sendPacket(packet: Messages.Packet): void;
@@ -139,6 +145,7 @@ declare namespace PartyGameShow {
     interface ToClient {
       playerInfo(player: Player): void;
       joinedRoom(room: Room): void;
+      roomClosed(_: void): void;
       loadGame(game: Responses.LoadGame): void;
       unloadGame(_: void): void;
       onPacket(packet: Messages.Packet): void;
@@ -148,7 +155,7 @@ declare namespace PartyGameShow {
     interface FromClient {
       getPlayerInfo(_: void): void;
       updatePlayerInfo(request: Partial<Player>): void;
-      joinRoom(request: Requests.JoinRoom): void;
+      joinLobby(request: Requests.JoinLobby): void;
       gameReady(_: void): void;
       returnResponse(packet: Messages.ResponsePacket): void;
     }
@@ -157,7 +164,7 @@ declare namespace PartyGameShow {
     addListener<E extends keyof Events, T>(event: E, listener: (this: T, data: Events[E]) => void, context?: T): string;
     addOneTimeListener<E extends keyof Events, T>(event: E, listener: (this: T, data: Events[E]) => void, context?: T): string;
     removeListener<E extends keyof Events>(event: E, id: string): void;
-    removeAllListeners<E extends keyof Events>(event: E);
+    removeAllListeners<E extends keyof Events>(event: E): void;
   }
   namespace Services {
     interface Host extends Signals.FromHost, Listener<Events.ToHost> { }
@@ -168,7 +175,7 @@ declare namespace PartyGameShow {
     interface Client extends Signals.ToClient, Listener<Events.FromClient> { }
   }
   interface Server extends Signals.FromHost {
-    clientConnected(client: Managers.Client);
+    clientConnected(client: Managers.Client): void;
   }
   namespace Views {
     interface GameHost {

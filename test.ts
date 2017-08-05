@@ -56,16 +56,16 @@ describe("Host", () => {
     it("should connect player", () => {
       return startRoom.then((room) => {
         env.clientConnections.forEach((client) => {
-          client.service.joinRoom({
+          client.service.joinLobby({
             playerID: client.playerID,
             lobbyCode: room.lobbyCode,
           });
         });
         return new Promise((resolve) => {
-          env.hostApp.addPlayerJoinedListener(resolve);
+          env.hostApp.addPlayerJoinedLobbyListener(resolve);
         });
       }).then(() => {
-        expect(env.hostSpy.playerJoined.getCall(0).args[0]).to.deep.equal(player);
+        expect(env.hostSpy.playerJoinedLobby.getCall(0).args[0]).to.deep.equal(player);
       });
     });
 
@@ -115,14 +115,14 @@ describe("Host", () => {
 
     const playersConnected = startRoom.then((room) => {
       env.clientConnections.forEach((client) => {
-        client.service.joinRoom({
+        client.service.joinLobby({
           playerID: client.playerID,
           lobbyCode: room.lobbyCode,
         });
       });
       const joined = players.map((player) => {
         return new Promise((resolve) => {
-          env.hostApp.addPlayerJoinedListener((p) => {
+          env.hostApp.addPlayerJoinedLobbyListener((p) => {
             if (p.playerID === player.playerID) {
               resolve(p);
             }
@@ -134,7 +134,7 @@ describe("Host", () => {
 
     it("should connect player", () => {
       return playersConnected.then(() => {
-        const calledArgs = env.hostSpy.playerJoined.getCalls().map((call) => call.args[0]);
+        const calledArgs = env.hostSpy.playerJoinedLobby.getCalls().map((call) => call.args[0]);
         expect(calledArgs).to.have.same.deep.members(players);
       });
     });

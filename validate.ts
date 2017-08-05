@@ -6,7 +6,7 @@ declare var _hostManager: PartyGameShow.Managers.Host;
 _hostService.addListener("availableGames", _hostManager.availableGames, _hostManager);
 _hostService.addListener("onRoom", _hostManager.onRoom, _hostManager);
 _hostService.addListener("gameContent", _hostManager.gameContent, _hostManager);
-_hostService.addListener("playerJoined", _hostManager.playerJoined, _hostManager);
+_hostService.addListener("playerJoinedLobby", _hostManager.playerJoinedLobby, _hostManager);
 _hostService.addListener("playerUpdated", _hostManager.playerUpdated, _hostManager);
 _hostService.addListener("playerReady", _hostManager.playerReady, _hostManager);
 _hostService.addListener("playerReturned", _hostManager.playerReturned, _hostManager);
@@ -33,7 +33,7 @@ _clientService.addListener("onError", _clientManager.onError, _clientManager);
 
 _clientManager.addListener("getPlayerInfo", _clientService.getPlayerInfo, _clientService);
 _clientManager.addListener("updatePlayerInfo", _clientService.updatePlayerInfo, _clientService);
-_clientManager.addListener("joinRoom", _clientService.joinRoom, _clientService);
+_clientManager.addListener("joinLobby", _clientService.joinLobby, _clientService);
 _clientManager.addListener("gameReady", _clientService.gameReady, _clientService);
 _clientManager.addListener("returnResponse", _clientService.returnResponse, _clientService);
 
@@ -45,6 +45,9 @@ class TestHostService implements PartyGameShow.Services.Host {
     throw new Error("Method not implemented.");
   }
   endRoom(): void {
+    throw new Error("Method not implemented.");
+  }
+  managePlayers(players: PartyGameShow.Requests.ManagePlayers): void {
     throw new Error("Method not implemented.");
   }
   startGame(game: PartyGameShow.Requests.NewGame): void {
@@ -83,7 +86,7 @@ class TestHostManager implements PartyGameShow.Managers.Host {
   gameContent(content: PartyGameShow.Game.Content): void {
     throw new Error("Method not implemented.");
   }
-  playerJoined(player: PartyGameShow.Player): void {
+  playerJoinedLobby(player: PartyGameShow.Player): void {
     throw new Error("Method not implemented.");
   }
   playerUpdated(player: PartyGameShow.Player): void {
@@ -119,7 +122,7 @@ class TestClientService implements PartyGameShow.Services.Client {
   updatePlayerInfo(player: Partial<PartyGameShow.Player>): void {
     throw new Error("Method not implemented.");
   }
-  joinRoom(request: PartyGameShow.Requests.JoinRoom): void {
+  joinLobby(request: PartyGameShow.Requests.JoinLobby): void {
     throw new Error("Method not implemented.");
   }
   gameReady(_: void): void {
@@ -147,6 +150,9 @@ class TestClientManager implements PartyGameShow.Managers.Client {
     throw new Error("Method not implemented.");
   }
   joinedRoom(room: PartyGameShow.Room): void {
+    throw new Error("Method not implemented.");
+  }
+  roomClosed(_: void): void {
     throw new Error("Method not implemented.");
   }
   loadGame(game: PartyGameShow.Responses.LoadGame): void {
