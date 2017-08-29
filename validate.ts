@@ -17,6 +17,7 @@ _hostManager.addListener("startRoom", _hostService.startRoom, _hostService);
 _hostManager.addListener("endRoom", _hostService.endRoom, _hostService);
 _hostManager.addListener("startGame", _hostService.startGame, _hostService);
 _hostManager.addListener("endGame", _hostService.endGame, _hostService);
+_hostManager.addListener("updateState", _hostService.updateState, _hostService);
 _hostManager.addListener("sendPacket", _hostService.sendPacket, _hostService);
 _hostManager.addListener("forceClear", _hostService.forceClear, _hostService);
 
@@ -27,6 +28,7 @@ _clientService.addListener("playerInfo", _clientManager.playerInfo, _clientManag
 _clientService.addListener("joinedRoom", _clientManager.joinedRoom, _clientManager);
 _clientService.addListener("loadGame", _clientManager.loadGame, _clientManager);
 _clientService.addListener("unloadGame", _clientManager.unloadGame, _clientManager);
+_clientService.addListener("stateChanged", _clientManager.stateChanged, _clientManager);
 _clientService.addListener("onPacket", _clientManager.onPacket, _clientManager);
 _clientService.addListener("onClear", _clientManager.onClear, _clientManager);
 _clientService.addListener("onError", _clientManager.onError, _clientManager);
@@ -54,6 +56,9 @@ class TestHostService implements PartyGameShow.Services.Host {
     throw new Error("Method not implemented.");
   }
   endGame(): void {
+    throw new Error("Method not implemented.");
+  }
+  updateState(states: PartyGameShow.Requests.UpdatePlayerState): void {
     throw new Error("Method not implemented.");
   }
   sendPacket(packet: PartyGameShow.Messages.Packet): void {
@@ -159,6 +164,9 @@ class TestClientManager implements PartyGameShow.Managers.Client {
     throw new Error("Method not implemented.");
   }
   unloadGame(_: void): void {
+    throw new Error("Method not implemented.");
+  }
+  stateChanged(state: object | null): void {
     throw new Error("Method not implemented.");
   }
   onPacket(packet: PartyGameShow.Messages.Packet): void {

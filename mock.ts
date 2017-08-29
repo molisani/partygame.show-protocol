@@ -122,6 +122,12 @@ class MockHostService implements PartyGameShow.Services.Host {
       this._from.emit("endGame", undefined);
     }, Math.random() * 10);
   }
+  updateState(states: PartyGameShow.Requests.UpdatePlayerState): void {
+    setTimeout(() => {
+      this._logger.log(`updateState(states=${states})`);
+      this._from.emit("updateState", states);
+    }, Math.random() * 10);
+  }
   sendPacket(packet: PartyGameShow.Messages.Packet): void {
     setTimeout(() => {
       this._logger.log(`sendPacket(msgID=${packet.msgID}, recipientIDs=${packet.recipientIDs})`);
@@ -299,6 +305,12 @@ class MockClientManager implements PartyGameShow.Managers.Client {
       this._to.emit("unloadGame", undefined);
     }, Math.random() * 10);
   }
+  stateChanged(state: object): void {
+    setTimeout(() => {
+      this._logger.log(`stateChanged(state=${state})`);
+      this._to.emit("stateChanged", state);
+    }, Math.random() * 10);
+  }
   onPacket(packet: PartyGameShow.Messages.Packet): void {
     setTimeout(() => {
       this._logger.log(`onPacket(msgID=${packet.msgID})`);
@@ -417,6 +429,11 @@ class MockServer implements PartyGameShow.Server {
   endGame(): void {
     throw new Error("Method not implemented: endGame");
   }
+  updateState(states: PartyGameShow.Requests.UpdatePlayerState): void {
+    Object.keys(states).forEach((playerID) => {
+      this._clients[playerID].stateChanged(states[playerID]);
+    });
+  }
   sendPacket(packet: PartyGameShow.Messages.Packet): void {
     packet.recipientIDs.forEach((recipientID) => {
       this._clients[recipientID].onPacket(packet);
@@ -509,6 +526,9 @@ export class MockHostApp implements PartyGameShow.Signals.FromHost {
   }
   endGame(): void {
     this._service.endGame(undefined);
+  }
+  updateState(states: PartyGameShow.Requests.UpdatePlayerState): void {
+    throw new Error("Method not implemented.");
   }
   sendPacket(packet: PartyGameShow.Messages.Packet): Promise<PartyGameShow.PlayerMap<PartyGameShow.Messages.ResponsePacket>> {
     return new Promise((resolve) => {
