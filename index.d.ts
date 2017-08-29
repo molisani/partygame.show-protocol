@@ -1,5 +1,5 @@
 /*
- * partygame.show 1.0.0-alpha.12 (https://github.com/molisani/partygame.show-protocol) 
+ * partygame.show 1.0.0-alpha.13 (https://github.com/molisani/partygame.show-protocol) 
  * Copyright 2017 Michael Molisani
  * Licensed under LGPL-3.0 (https://github.com/molisani/partygame.show-protocol/blob/master/LICENSE)
  */
@@ -46,6 +46,9 @@ declare namespace PartyGameShow {
     interface NewGame {
       gametype: string;
       playerIDs: string[];
+    }
+    interface UpdatePlayerState {
+      [playerID: string]: object | null;
     }
   }
   namespace Responses {
@@ -100,6 +103,7 @@ declare namespace PartyGameShow {
       managePlayers: Requests.ManagePlayers;
       startGame: Requests.NewGame;
       endGame: void;
+      updateState: Requests.UpdatePlayerState;
       sendPacket: Messages.Packet;
       forceClear: void;
     }
@@ -109,6 +113,7 @@ declare namespace PartyGameShow {
       roomClosed: void;
       loadGame: Responses.LoadGame;
       unloadGame: void;
+      stateChanged: object | null;
       onPacket: Messages.Packet;
       onClear: void;
       onError: object;
@@ -118,6 +123,7 @@ declare namespace PartyGameShow {
       updatePlayerInfo: Partial<Player>;
       joinLobby: Requests.JoinLobby;
       gameReady: void;
+      stateChanged: object;
       returnResponse: Messages.ResponsePacket;
     }
   }
@@ -139,6 +145,7 @@ declare namespace PartyGameShow {
       managePlayers(players: Requests.ManagePlayers): void;
       startGame(game: Requests.NewGame): void;
       endGame(_: void): void;
+      updateState(states: Requests.UpdatePlayerState): void;
       sendPacket(packet: Messages.Packet): void;
       forceClear(_: void): void;
     }
@@ -148,6 +155,7 @@ declare namespace PartyGameShow {
       roomClosed(_: void): void;
       loadGame(game: Responses.LoadGame): void;
       unloadGame(_: void): void;
+      stateChanged(state: object | null): void;
       onPacket(packet: Messages.Packet): void;
       onClear(_: void): void;
       onError(err: object): void;
